@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunucuya Bağlanılıyor...</title>
+    <!-- Performans: harici domain'lere erken bağlantı -->
+    <!-- Yerel asset'ler için preload - ilk arka plan -->
+    <link rel="preload" as="image" href="assets/media/backgrounds/bg-01.webp">
+    <!-- Müzik preload (opsiyonel - bazı tarayıcılar ignore eder) -->
+    <link rel="preload" as="audio" href="assets/media/music/ambient-loop.ogg">
+    <!-- Stil -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div id="background-slider"></div>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <header>
+            <h1 id="server-name">Sunucu Adı Yükleniyor...</h1>
+        </header>
+
+        <main>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-bar-inner" class="progress-bar-inner"></div>
+                </div>
+                <p id="status">Bağlantı kuruluyor...</p>
+                <p id="download-file"></p>
+            </div>
+
+            <div class="info-panel">
+                <div class="info-item">
+                    <strong>Oyun Modu:</strong>
+                    <span id="gamemode">...</span>
+                </div>
+                <div class="info-item">
+                    <strong>Harita:</strong>
+                    <span id="map-name">...</span>
+                </div>
+            </div>
+
+            <div class="tips-container">
+                <p id="tip">İpucu: Yükleniyor...</p>
+            </div>
+        </main>
+
+        <footer>
+            <div class="music-player">
+                <button id="toggle-music">Müziği Durdur</button>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
+                <button id="theme-toggle" title="Tema Değiştir">Tema: Koyu</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
