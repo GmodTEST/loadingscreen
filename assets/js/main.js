@@ -1,3 +1,73 @@
+// GMod entegrasyonu: callback'leri erken kaydet ve durumu tamponla
+(function() {
+    const GSTATE = { servername: null, mapname: null, gamemode: null, volume: null, total: 0, needed: 0, status: '', file: '', received: false };
+    let domReady = false;
+
+    function applyProgressIfPossible() {
+        if (domReady && typeof updateProgressBar === 'function' && GSTATE.total > 0) {
+            const p = ((GSTATE.total - GSTATE.needed) / GSTATE.total) * 100;
+            updateProgressBar(p);
+        }
+    }
+
+    window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume, language) {
+        GSTATE.received = true;
+        GSTATE.servername = servername;
+        GSTATE.mapname = mapname;
+        GSTATE.gamemode = gamemode;
+        GSTATE.volume = volume;
+        if (domReady) {
+            const serverNameElem = document.getElementById('server-name');
+            const gamemodeElem = document.getElementById('gamemode');
+            const mapNameElem = document.getElementById('map-name');
+            if (serverNameElem) {
+                if (window.CONFIG && CONFIG.forceServerName) serverNameElem.textContent = CONFIG.serverName;
+                else serverNameElem.textContent = servername;
+            }
+            if (gamemodeElem) gamemodeElem.textContent = gamemode;
+            if (mapNameElem) mapNameElem.textContent = mapname;
+            if (window.musicAudio) {
+                try { musicAudio.volume = volume; } catch {}
+                const vs = document.getElementById('volume-slider');
+                if (vs) vs.value = volume;
+                try { musicAudio.play(); } catch {}
+            }
+        }
+    };
+
+    window.SetStatusChanged = function(status) {
+        GSTATE.received = true;
+        GSTATE.status = status;
+        if (domReady) {
+            const statusElem = document.getElementById('status');
+            if (statusElem) statusElem.textContent = status;
+        }
+    };
+
+    window.SetFilesTotal = function(total) {
+        GSTATE.received = true;
+        GSTATE.total = total;
+        applyProgressIfPossible();
+    };
+
+    window.SetFilesNeeded = function(needed) {
+        GSTATE.received = true;
+        GSTATE.needed = needed;
+        applyProgressIfPossible();
+    };
+
+    window.DownloadingFile = function(fileName) {
+        GSTATE.received = true;
+        GSTATE.file = fileName;
+        if (domReady) {
+            const el = document.getElementById('download-file');
+            if (el) el.textContent = `İndiriliyor: ${fileName}`;
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => { domReady = true; window.__GMOD_STATE = GSTATE; });
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM elementlerini seç
     const serverNameElem = document.getElementById('server-name');
@@ -51,48 +121,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- GMOD Arayüz Fonksiyonları ---
 
     // Oyun detayları geldiğinde çağrılır
-    window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume, language) {
+    // GMod daha önce veri gönderdiyse state'i uygula
+    if (window.__GMOD_STATE && window.__GMOD_STATE.received) {
         gmodDataReceived = true;
-        serverNameElem.textContent = servername;
-        gamemodeElem.textContent = gamemode;
-        mapNameElem.textContent = mapname;
-
-        // Oyuncunun ses ayarını uygula
-        if (musicAudio) {
-            musicAudio.volume = volume;
-            volumeSlider.value = volume;
+        const S = window.__GMOD_STATE;
+        if (!(window.CONFIG && CONFIG.forceServerName)) serverNameElem.textContent = S.servername || serverNameElem.textContent;
+        gamemodeElem.textContent = S.gamemode || gamemodeElem.textContent;
+        mapNameElem.textContent = S.mapname || mapNameElem.textContent;
+        if (S.status) statusElem.textContent = S.status;
+        if (S.file) downloadFileElem.textContent = `İndiriliyor: ${S.file}`;
+        if (S.total > 0) {
+            const p = ((S.total - S.needed) / S.total) * 100;
+            updateProgressBar(p);
         }
-    };
-
-    // İndirme durumu değiştiğinde çağrılır
-    window.SetStatusChanged = function(status) {
-        gmodDataReceived = true;
-        statusElem.textContent = status;
-    };
-
-    // İndirilecek toplam dosya sayısı
-    let totalFiles = 0;
-    window.SetFilesTotal = function(total) {
-        gmodDataReceived = true;
-        totalFiles = total;
-    };
-
-    // Kalan dosya sayısı
-    let neededFiles = 0;
-    window.SetFilesNeeded = function(needed) {
-        gmodDataReceived = true;
-        neededFiles = needed;
-        if (totalFiles > 0) {
-            const percentage = ((totalFiles - neededFiles) / totalFiles) * 100;
-            updateProgressBar(percentage);
+        if (musicAudio && S.volume != null) {
+            musicAudio.volume = S.volume;
+            volumeSlider.value = S.volume;
+            try { musicAudio.play(); } catch {}
         }
-    };
-
-    // Bir dosya indirilmeye başlandığında
-    window.DownloadingFile = function(fileName) {
-        gmodDataReceived = true;
-        downloadFileElem.textContent = `İndiriliyor: ${fileName}`;
-    };
+    }
 
     // --- Arayüz Güncelleme Fonksiyonları ---
 
