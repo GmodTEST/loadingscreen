@@ -7,9 +7,9 @@ const CONFIG = {
     // Buradaki placeholder dosyaları kendi görüntülerinizle değiştirin.
     // Önerilen dizin: assets/media/backgrounds/
     backgrounds: [
-        'assets/media/backgrounds/1.jpg',
-        'assets/media/backgrounds/2.jpg',
-        'assets/media/backgrounds/3.jpg'
+        'https://gmodtest.github.io/loadingscreen/assets/media/backgrounds/1.jpg',
+        'https://gmodtest.github.io/loadingscreen/assets/media/backgrounds/2.jpg',
+        'https://gmodtest.github.io/loadingscreen/assets/media/backgrounds/3.jpg'
     ],
     backgroundInterval: 5000, // ms
 
@@ -32,3 +32,4 @@ const CONFIG = {
     // Sahte İlerleme Barı
     fakeLoadingTime: 20,
 };
+
